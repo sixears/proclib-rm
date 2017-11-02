@@ -1,0 +1,25 @@
+basename=/run/current-system/sw/bin/basename
+cp=/run/current-system/sw/bin/cp
+mkdir=/run/current-system/sw/bin/mkdir
+rm=/run/current-system/sw/bin/rm
+sha256sum=/run/current-system/sw/bin/sha256sum
+tar=/run/current-system/sw/bin/tar
+
+src_dist_gz=dist/proclib-rm-0.0.1.0.tar.gz
+dist_gz=../dists/"$($basename "$src_dist_gz")"
+dist="${dist_gz%.gz}"
+
+tempdir=$(mktemp --directory --tmpdir mkdist.XXX )
+echo 'untar.....';                                                             \
+  $tar -C $tempdir                                                             \
+                 --extract --gzip                                              \
+                 --file    $src_dist_gz                                        \
+                 --exclude proclib-rm-0.0.1.0/src/ProcLib/Rm/Paths.hs       && \
+echo '.mkdir....';                                                             \
+  $mkdir -p $tempdir/proclib-rm-0.0.1.0/proto/ProcLib/Rm                    && \
+echo '....cp....'; $cp proto/ProcLib/Rm/Paths.hs                               \
+                $tempdir/proclib-rm-0.0.1.0/proto/ProcLib/Rm/Paths.hs       && \
+echo '.....tar..'; $tar -C $tempdir --create --gzip                            \
+                                    --file $dist_gz proclib-rm-0.0.1.0/     && \
+echo '.(cleanup)';$rm -fr $tempdir                                          && \
+$sha256sum $dist_gz
