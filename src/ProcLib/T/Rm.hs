@@ -19,7 +19,7 @@ import System.IO            ( IO )
 
 -- path --------------------------------
 
-import Path  ( mkAbsDir )
+import Path  ( mkAbsDir, toFilePath )
 
 -- proclib -----------------------------
 
@@ -41,11 +41,7 @@ import Test.Tasty.HUnit  ( (@?=), testCase )
 
 -- text --------------------------------
 
-import Data.Text  ( Text )
-
--- textconv ----------------------------
-
-import Data.Text.Conv  ( ToText( toText ) )
+import Data.Text  ( Text, pack )
 
 ------------------------------------------------------------
 --                     local imports                      --
@@ -96,8 +92,10 @@ sshRmTest =
     , testCase "sshRmDirContents (no BB)" $
          sshRmDirContentsCmd "nohost" $(mkAbsDir "/tmp/remove_me") NoUseBusybox
       @?= CmdSpec SPaths.ssh
-                  [ "nohost", "--"
-                  , toText Paths.rm, "--recursive", "--", "/tmp/remove_me/*" ]
+                  [ "nohost"
+                  , "--", pack (toFilePath Paths.rm), "--recursive"
+                  , "--", "/tmp/remove_me/*"
+                  ]
 
     ]
 

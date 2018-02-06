@@ -33,7 +33,7 @@ import Control.Lens.Getter  ( (^.) )
 
 -- path --------------------------------
 
-import Path  ( Abs, Dir, Path )
+import Path  ( Abs, Dir, Path, toFilePath )
 
 -- proclib -----------------------------
 
@@ -58,11 +58,7 @@ import ProcLib.SSH.Opt    ( AsSSHOpt, SSHOpt )
 
 -- text --------------------------------
 
-import Data.Text  ( Text )
-
--- textconv ----------------------------
-
-import Data.Text.Conv  ( toText )
+import Data.Text  ( Text, pack )
 
 ------------------------------------------------------------
 --                     local imports                      --
@@ -122,7 +118,7 @@ sshRmDirContentsCmd h path o =
   let opts :: [RmSSHOpt]
       opts = ifUseBusybox o $( mkOptsRmSSH [ Rm.recurse, Rm.busybox ] )
                             $( mkOptsRmSSH [ Rm.recurse ] )
-   in sshRmCmd h (pure $ SPathF (toText path) <| WildStar :| []) opts
+   in sshRmCmd h (pure $ SPathF (pack $ toFilePath path) <| WildStar :| []) opts
 
 
 -------------------------------------------------------------------------------
