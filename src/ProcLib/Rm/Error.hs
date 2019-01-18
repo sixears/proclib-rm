@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell   #-}
 
 module ProcLib.Rm.Error
-  ( AsRmError( _RmError ), RmError( RmError ), RmSSHError( RmE, SSHE )
+  ( AsRmError( _RmError ), RmError, RmSSHError, RmCPError, RmSSHCPError
   , mkRmError )
 where 
 
@@ -24,7 +24,10 @@ import Control.Lens.TH     ( makePrisms )
 
 -- proclib -----------------------------
 
-import ProcLib.Process  ( CmdSpec, ExitVal )
+import ProcLib.Error.CreateProcError  ( AsCreateProcError( _CreateProcError )
+                                      , CreateProcError )
+import ProcLib.Types.CmdSpec          ( CmdSpec )
+import ProcLib.Types.ExitVal          ( ExitVal )
 
 -- proclib-ssh -------------------------
 
@@ -46,6 +49,8 @@ instance AsRmError RmError where
 mkRmError :: AsRmError ε => CmdSpec -> ExitVal ->  ε
 mkRmError cmdspec ev = _RmError ## RmError cmdspec ev
 
+------------------------------------------------------------
+
 data RmSSHError = RmE RmError | SSHE SSHError
   deriving (Eq, Show)
 
@@ -56,5 +61,34 @@ instance AsRmError RmSSHError where
 
 instance AsSSHError RmSSHError where
   _SSHError = _SSHE
+
+------------------------------------------------------------
+
+data RmCPError = RCRmE RmError | RCCPE CreateProcError
+  deriving (Eq, Show)
+
+$( makePrisms ''RmCPError )
+
+instance AsRmError RmCPError where
+  _RmError = _RCRmE
+
+instance AsCreateProcError RmCPError where
+  _CreateProcError = _RCCPE
+
+------------------------------------------------------------
+
+data RmSSHCPError = RSCRmE RmError | RSCSSHE SSHError | RSCCPE CreateProcError
+  deriving (Eq, Show)
+
+$( makePrisms ''RmSSHCPError )
+
+instance AsRmError RmSSHCPError where
+  _RmError = _RSCRmE
+
+instance AsSSHError RmSSHCPError where
+  _SSHError = _RSCSSHE
+
+instance AsCreateProcError RmSSHCPError where
+  _CreateProcError = _RSCCPE
 
 -- that's all, folks! ----------------------------------------------------------

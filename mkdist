@@ -2,34 +2,47 @@ swbin=/run/current-system/sw/bin
 basename=$swbin/basename
 cp=$swbin/cp
 dirname=$swbin/dirname
+find=$swbin/find
 ls=$swbin/ls
 mkdir=$swbin/mkdir
+perl=$swbin/perl
 pwd=$swbin/pwd
 rm=$swbin/rm
 sha256sum=$swbin/sha256sum
 tail=$swbin/tail
 tar=$swbin/tar
 
+package=$($basename $($pwd))
+
 d=$($dirname $0)
 pushd $d; dir=$($basename $(pwd)); popd
-echo dir: $dir
 b=$($basename $( $ls dist/*.tar.gz | $tail -n 1 ) .tar.gz)
 version=${b#$dir-}
-src_dist_gz=dist/proclib-rm-$version.tar.gz
+
+pv=$package-$version
+
+src_dist_gz=dist/$pv.tar.gz
 dist_gz=../dists/"$($basename "$src_dist_gz")"
 dist="${dist_gz%.gz}"
 
-tempdir=$(mktemp --directory --tmpdir mkdist.XXX )
-echo 'untar.....';                                                             \
-  $tar -C $tempdir                                                             \
-                 --extract --gzip                                              \
-                 --file    $src_dist_gz                                        \
-                 --exclude proclib-rm-$version/src/ProcLib/Rm/Paths.hs      && \
-echo '.mkdir....';                                                             \
-  $mkdir -p $tempdir/proclib-rm-$version/proto/ProcLib/Rm                   && \
-echo '....cp....'; $cp proto/ProcLib/Rm/Paths.hs                               \
-                $tempdir/proclib-rm-$version/proto/ProcLib/Rm/Paths.hs      && \
-echo '.....tar..'; $tar -C $tempdir --create --gzip                            \
-                                    --file $dist_gz proclib-rm-$version/    && \
-echo '.(cleanup)';$rm -fr $tempdir                                          && \
-$sha256sum $dist_gz
+if [ -e "$dist_gz" ]; then
+  echo "not overwriting extant $dist_gz" >&2
+  exit 3
+fi
+
+{
+  if [ -d proto/ ]; then
+    tempdir=$(mktemp --directory --tmpdir mkdist.XXX )
+    echo 'untar.....';                                                             \
+      $tar -C $tempdir                                                             \
+                     --extract --gzip                                              \
+                     --file    $src_dist_gz                                        \
+                     --exclude-from <( $find proto/ -type f -name \*.hs | \
+                                       $perl -ple "s=^proto/=$pv/src/=" )       && \
+    echo '..rsync...'; rsync -Paq proto/ $tempdir/$pv/proto/                    && \
+    echo '.....tar..'; $tar -C $tempdir --create --gzip --file $dist_gz $pv/    && \
+    echo '.(cleanup)';$rm -fr $tempdir
+  else
+    echo '....cp....'; $cp $src_dist_gz $dist_gz
+  fi
+} && $sha256sum $dist_gz

@@ -24,8 +24,8 @@ import Path  ( mkAbsDir, toFilePath )
 -- proclib -----------------------------
 
 import ProcLib.CommonOpt.Busybox  ( UseBusybox( NoUseBusybox, UseBusybox ) )
-import ProcLib.Process            ( CmdSpec( CmdSpec ) )
 import ProcLib.ShellPath          ( ShellPathFragment( SPathF, WildStar ) )
+import ProcLib.Types.CmdSpec      ( CmdSpec( CmdSpec ) )
 
 -- proclib-ssh -------------------------
 

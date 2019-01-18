@@ -23,3 +23,4 @@ ghc-mod.package-db-stack
 *.dyn_o
 src/ProcLib/Rsync/Paths.hs
 cabal.nix
+default.nix.bak
