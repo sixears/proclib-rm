@@ -13,13 +13,10 @@ import Data.Function      ( id )
 import Data.Maybe         ( Maybe( Just ) )
 import Text.Show          ( Show )
 
--- fluffy ------------------------------
-
-import Fluffy.Lens  ( (##) )
-
 -- lens --------------------------------
 
 import Control.Lens.Prism  ( Prism', prism' )
+import Control.Lens.Review ( (#) )
 import Control.Lens.TH     ( makePrisms )
 
 -- proclib -----------------------------
@@ -47,7 +44,7 @@ instance AsRmError RmError where
   _RmError = prism' id Just
 
 mkRmError :: AsRmError ε => CmdSpec -> ExitVal ->  ε
-mkRmError cmdspec ev = _RmError ## RmError cmdspec ev
+mkRmError cmdspec ev = _RmError # RmError cmdspec ev
 
 ------------------------------------------------------------
 

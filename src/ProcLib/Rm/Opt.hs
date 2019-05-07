@@ -32,6 +32,7 @@ import Fluffy.Lens  ( prismMatch )
 -- lens --------------------------------
 
 import Control.Lens.Fold    ( (^?) )
+import Control.Lens.Review  ( (#) )
 import Control.Lens.Setter  ( (.~) )
 import Control.Lens.TH      ( makeClassyPrisms, makePrisms )
 
@@ -52,22 +53,17 @@ import Language.Haskell.TH.Syntax  ( Lift( lift ) )
 ------------------------------------------------------------
 
 import ProcLib.CommonOpt.Busybox  ( AsBusyboxOpt, BusyboxOpt( ANDROID_BUSYBOX )
-                                 , _BusyboxOpt, androidBusyboxBin, busybox )
+                                  , _BusyboxOpt, androidBusyboxBin, busybox )
 import ProcLib.Opt                ( Opt( cmpOpt, mkOpts )
-                                 , (##), cmpOptDefaultLensed
-                                 , cmpOptPrism, cmpOptPrisms, liftAbsFile
-                                 )
-import ProcLib.Rm.Req             ( RmReq
-
-                                 , rmPath, rmRecurse, rmBusyBoxOpt
-
-                                 , rmReqDefault
-                                 )
-
+                                  , cmpOptDefaultLensed, cmpOptPrism
+                                  , cmpOptPrisms, liftAbsFile
+                                  )
+import ProcLib.Rm.Req             ( RmReq, rmPath, rmRecurse, rmBusyBoxOpt
+                                  , rmReqDefault )
 import ProcLib.SSH.Opt            ( AsSSHOpt( _SSHOpt )
-                                 , AsSSHPureOpt( _SSHPureOpt ), SSHOpt
-                                 , _SSH_PURE_OPT
-                                 )
+                                  , AsSSHPureOpt( _SSHPureOpt ), SSHOpt
+                                  , _SSH_PURE_OPT
+                                  )
 
 -------------------------------------------------------------------------------
 
@@ -90,13 +86,13 @@ androidPath :: Path Abs File
 androidPath = androidBusyboxBin $( mkRelFile "rm" )
 
 path :: AsRmPureOpt o => Path Abs File -> o
-path p = _RM_PATH ## p
+path p = _RM_PATH # p
 
 pathAndroid :: AsRmPureOpt o => o
-pathAndroid = _RM_PATH ## androidPath
+pathAndroid = _RM_PATH # androidPath
 
 recurse :: AsRmPureOpt o => o
-recurse = _RM_RECURSE ## ()
+recurse = _RM_RECURSE # ()
 
 -------------------------------------------------------------------------------
 
